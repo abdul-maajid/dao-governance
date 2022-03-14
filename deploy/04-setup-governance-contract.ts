@@ -1,21 +1,24 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { ADDRESS_ZERO } from "../helper-hardhat-config";
 // @ts-ignore
 import { ethers } from "hardhat";
-import { ADDRESS_ZERO } from "../helper-hardhat-config";
 
 const setupContracts: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ) {
   // @ts-ignore
-  const { deployments, getNamedAccounts } = hre;
-  const { deploy, log, get } = deployments;
+  const { getNamedAccounts, deployments, network } = hre;
+  const { log } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const timeLock = await ethers.get("TimeLock", deployer);
-  const governor = await ethers.get("GovernorContract", deployer);
+  const timeLock = await ethers.getContract("TimeLock", deployer);
+  const governor = await ethers.getContract("GovernorContract", deployer);
 
-  log("Setting up roles...");
+  log("----------------------------------------------------");
+  log("Setting up contracts for roles...");
+
+  // would be great to use multicall here...
   const proposerRole = await timeLock.PROPOSER_ROLE();
   const executorRole = await timeLock.EXECUTOR_ROLE();
   const adminRole = await timeLock.TIMELOCK_ADMIN_ROLE();
